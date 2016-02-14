@@ -58,6 +58,9 @@
 - name: configuring logstash to work with nginx logs 2
   template: src=10-logstash-nginx.conf dest=/etc/logstash/conf.d/
 
+- name: allows logstash to access nginx log directory
+  file: path=/var/log/nginx/ state=directory mode=0755
+
 - name: configuruing kibana to work with pm2
   template: src=kibana.json dest=/opt/kibana/
 
