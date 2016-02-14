@@ -1,0 +1,16 @@
+{
+  "apps" : [{
+    "name"        : "kibana-app",
+    "script"      : "/opt/kibana/node/bin/node",
+    "args"        : "/opt/kibana/src/cli",
+    "merge_logs"  : true,
+    "watch"       : true,
+    "cwd"	  : "/opt/kibana/bin/",
+    "env": {
+        "NODE_ENV": "production",
+        "CONFIG_PATH": "/opt/kibana/config/kibana.yml"
+    }
+  }]
+}
+
+

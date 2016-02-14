@@ -1,0 +1,74 @@
+---
+
+- name: upgrade all packages
+  yum: name=* state=latest
+
+- name: get gpg key
+  rpm_key: state=present key=https://packages.elastic.co/GPG-KEY-elasticsearch
+  
+- name: Add elasticsearch repository
+  yumrepo:
+    name: elasticsearch-2.x
+    description: Elasticsearch repository for 2.x packages
+    baseurl: http://packages.elastic.co/elasticsearch/2.x/centos
+    gpgcheck: yes
+    gpgkey: http://packages.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+
+- name: Add logstash repository
+  yumrepo:
+    name: logstash-2.2
+    description: Logstash repository for 2.2.x packages
+    baseurl: http://packages.elastic.co/logstash/2.2/centos
+    gpgcheck: yes
+    gpgkey: http://packages.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+
+- name: Add kibana repository
+  yumrepo:
+    name: kibana-4.4
+    description: Kibana repository for 4.4.x packages
+    baseurl: http://packages.elastic.co/kibana/4.4/centos
+    gpgcheck: yes
+    gpgkey: http://packages.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+
+- name: Install ELK and nginx packages
+  yum: name={{ item }} state=present enablerepo=epel
+  with_items:
+   - nodejs
+   - npm
+   - elasticsearch
+   - logstash
+   - kibana
+   - nginx
+
+- name: installing pm2
+  command: npm install -g pm2
+
+- name: replaces nginx configuration
+  template: src=nginx.conf dest=/etc/nginx/ mode=0744
+
+- name: ensure patterns folder exists in logstash
+  file: path=/opt/logstash/patterns/ recurse=yes state=directory
+
+- name: configuring logstash to work with nginx logs
+  template: src=nginx dest=/opt/logstash/patterns/
+
+- name: configuring logstash to work with nginx logs 2
+  template: src=10-logstash-nginx.conf dest=/etc/logstash/conf.d/
+
+- name: configuruing kibana to work with pm2
+  template: src=kibana.json dest=/opt/kibana/
+
+- name: enabling elasticsearch service
+  service: name=elasticsearch state=started enabled=yes
+
+- name: enabling logstash service
+  service: name=logstash state=started enabled=yes
+
+- name: enabling nginx service
+  service: name=nginx state=started enabled=yes
+
+- name: starting kibana
+  command: pm2 start /opt/kibana/kibana.json

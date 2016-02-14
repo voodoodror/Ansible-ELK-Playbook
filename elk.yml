@@ -1,0 +1,10 @@
+---
+# This playbook deploys the whole application stack in this site.  
+
+- name: configure and install elk
+  hosts: all
+  remote_user: ec2-user
+  sudo: yes
+
+  roles:
+    - elk
